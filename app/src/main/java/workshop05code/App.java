@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public class App {
         try {// resources\logging.properties
             LogManager.getLogManager().readConfiguration(new FileInputStream("resources/logging.properties"));
         } catch (SecurityException | IOException e1) {
-            e1.printStackTrace();
+            System.err.println("Failed to configure logger. Default settings will be used.");
         }
     }
 
@@ -56,17 +57,15 @@ public class App {
             while ((line = br.readLine()) != null) {
                 if(isValidWordFormat(line)) {
                     wordleDatabaseConnection.addValidWord(i, line);
+                    logger.log(Level.INFO, "Valid word added: {0}", line);
                     i++;
                 } else {
-                    System.out.println("Ignoring invalid word: " + line);
+                    logger.log(Level.SEVERE, "Invalid word in data.txt: {0}", line);
                 }
-                System.out.println(line);
-                
             }
 
         } catch (IOException e) {
-            System.out.println("Not able to load . Sorry!");
-            System.out.println(e.getMessage());
+            logger.log(Level.WARNING, "Error reading words from data.txt", e);
             return;
         }
 
@@ -81,6 +80,7 @@ public class App {
 
                 if (!isValidWordFormat(guess)) {
                     System.out.println("Invalid input! Enter exactly 4 lowercase letters (a-z).\n");
+                    logger.log(Level.WARNING, "Invalid guess: {0}", guess);
                     continue;
                 }
 
@@ -93,7 +93,7 @@ public class App {
                 }
             }
         } catch (NoSuchElementException | IllegalStateException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Scanner error in user input loop", e);
         }
 
     }

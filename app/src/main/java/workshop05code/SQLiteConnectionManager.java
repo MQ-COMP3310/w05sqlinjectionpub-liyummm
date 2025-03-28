@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -60,12 +61,11 @@ public class SQLiteConnectionManager {
         try (Connection conn = DriverManager.getConnection(databaseURL)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                logger.log(Level.INFO, "Database created. Driver: {0}", meta.getDriverName());
 
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.SEVERE, "Database creation failed.", e);
         }
     }
 
@@ -80,15 +80,12 @@ public class SQLiteConnectionManager {
             return false;
         } else {
             try (Connection conn = DriverManager.getConnection(databaseURL)) {
-                if (conn != null) {
-                    return true;
-                }
+                return conn != null;
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                logger.log(Level.SEVERE, "Database connection check failed.", e);
                 return false;
             }
         }
-        return false;
     }
 
     /**
@@ -109,7 +106,7 @@ public class SQLiteConnectionManager {
                 return true;
 
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                logger.log(Level.SEVERE, "Table creation failed.", e);
                 return false;
             }
         }
@@ -132,7 +129,7 @@ public class SQLiteConnectionManager {
             pstmt.setString(2, word);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.SEVERE, "Failed to insert valid word: " + word, e);
         }
 
     }
@@ -160,7 +157,7 @@ public class SQLiteConnectionManager {
             return false;
     
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.SEVERE, "Database query failed for word: " + guess, e);
             return false;
         }
     }
