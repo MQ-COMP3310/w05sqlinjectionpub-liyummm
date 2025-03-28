@@ -1,13 +1,11 @@
 package workshop05code;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-//Included for the logging exercise
-import java.io.FileInputStream;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -56,9 +54,14 @@ public class App {
             String line;
             int i = 1;
             while ((line = br.readLine()) != null) {
+                if(isValidWordFormat(line)) {
+                    wordleDatabaseConnection.addValidWord(i, line);
+                    i++;
+                } else {
+                    System.out.println("Ignoring invalid word: " + line);
+                }
                 System.out.println(line);
-                wordleDatabaseConnection.addValidWord(i, line);
-                i++;
+                
             }
 
         } catch (IOException e) {
@@ -70,24 +73,31 @@ public class App {
         // let's get them to enter a word
 
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Enter a 4 letter word for a guess or q to quit: ");
-            String guess = scanner.nextLine();
+            while (true) {
+                System.out.print("Enter a 4-letter word for a guess or 'q' to quit: ");
+                String guess = scanner.nextLine();
 
-            while (!guess.equals("q")) {
-                System.out.println("You've guessed '" + guess+"'.");
+                if (guess.equals("q")) break;
 
-                if (wordleDatabaseConnection.isValidWord(guess)) { 
-                    System.out.println("Success! It is in the the list.\n");
-                }else{
-                    System.out.println("Sorry. This word is NOT in the the list.\n");
+                if (!isValidWordFormat(guess)) {
+                    System.out.println("Invalid input! Enter exactly 4 lowercase letters (a-z).\n");
+                    continue;
                 }
 
-                System.out.print("Enter a 4 letter word for a guess or q to quit: " );
-                guess = scanner.nextLine();
+                System.out.println("You've guessed '" + guess + "'.");
+
+                if (wordleDatabaseConnection.isValidWord(guess)) {
+                    System.out.println("Success! It is in the list.\n");
+                } else {
+                    System.out.println("Sorry. This word is NOT in the list.\n");
+                }
             }
         } catch (NoSuchElementException | IllegalStateException e) {
             e.printStackTrace();
         }
 
+    }
+    private static boolean isValidWordFormat(String word) {
+        return word.matches("[a-z]{4}");
     }
 }
